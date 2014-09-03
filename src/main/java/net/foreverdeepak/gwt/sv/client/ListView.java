@@ -41,6 +41,7 @@ public class ListView extends Composite implements ResizeHandler, ScrollHandler 
 	int width = 0;
 	int tdCount = 0;
 	Unit unit = Unit.PCT;
+	int scrollTop = 0;
 	
 	Timer resizeTimer;
 	RequestBuilder requestBuilder;
@@ -136,6 +137,10 @@ public class ListView extends Composite implements ResizeHandler, ScrollHandler 
 			AdItemView itemView = new AdItemView(ad, width, unit);
 			td.appendChild(itemView.getElement());
 			tdIndex++;
+		}
+		
+		if(cachedAds.size() > ads.size()) {
+			//Window.scrollTo(0, scrollTop+Window.getClientHeight());
 		}
 	}
 	
