@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:m="urn:import:net.foreverdeepak.gwt.sv.client">
+
+	<ui:style>
+	.td-valign {
+		vertical-align: top;
+	}
+	</ui:style>
+	<g:HTMLPanel>
+		<table align="center" width="100%">
+			<tbody>
+				<tr ui:field="mrow" width="100%">
+
+				</tr>
+			</tbody>
+		</table>
+	</g:HTMLPanel>
+</ui:UiBinder>
