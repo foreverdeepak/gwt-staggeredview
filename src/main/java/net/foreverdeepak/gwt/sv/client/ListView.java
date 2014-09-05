@@ -7,25 +7,21 @@ import net.foreverdeepak.gwt.sv.client.pojo.Ad;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.TableCellElement;
 import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
+import com.google.gwt.jsonp.client.JsonpRequestBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ScrollEvent;
 import com.google.gwt.user.client.Window.ScrollHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -105,26 +101,23 @@ public class ListView extends Composite implements ResizeHandler, ScrollHandler 
 			return;
 		}
 		loading = true;
-		requestBuilder = new RequestBuilder(RequestBuilder.POST, URL.encode("ads"));
 		
-		try {
-			requestBuilder.sendRequest(null, new RequestCallback() {
-				
-				@Override
-				public void onResponseReceived(Request request, Response response) {
-					loading = false;
-					JsArray<Ad> adArray = JsonUtils.unsafeEval(response.getText());
-					renderAds(adArray);
-				}
-				
-				@Override
-				public void onError(Request request, Throwable exception) {
-					loading = false;
-				}
-			});
-		} catch (RequestException e) {
-			e.printStackTrace();
-		}
+		JsonpRequestBuilder builder = new JsonpRequestBuilder();
+		builder.setCallbackParam("_jsonp");
+		builder.requestObject("http://www.madpiggy.com:5051/ws/ad.jsonp", new AsyncCallback<JsArray<Ad>>() {
+			
+			@Override
+			public void onSuccess(JsArray<Ad> result) {
+				loading = false;
+				renderAds(result);
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				loading = false;
+			}
+		});
+		
 	}
 	
 	private void renderAds(List<Ad> ads) {

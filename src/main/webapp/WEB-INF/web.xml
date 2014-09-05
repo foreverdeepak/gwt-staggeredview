@@ -5,16 +5,6 @@
 
 <web-app>
 
-	<servlet>
-		<servlet-name>adServlet</servlet-name>
-		<servlet-class>net.foreverdeepak.gwt.sv.client.server.AdServlet</servlet-class>
-	</servlet>
-	
-	<servlet-mapping>
-		<servlet-name>adServlet</servlet-name>
-		<url-pattern>/ads</url-pattern>
-	</servlet-mapping>
-
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>sview.html</welcome-file>
