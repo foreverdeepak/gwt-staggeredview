@@ -1,19 +1,18 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:m="urn:import:net.foreverdeepak.gwt.sv.client">
-
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" 
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
-	.td-valign {
-		vertical-align: top;
-	}
+		.absolute {
+			position: absolute;
+		}
+		
+		.relative {
+			position: relative;
+		}
 	</ui:style>
-	<g:HTMLPanel>
-		<table align="center" width="100%">
-			<tbody>
-				<tr ui:field="mrow" width="100%">
-
-				</tr>
-			</tbody>
-		</table>
-	</g:HTMLPanel>
+	<g:FlowPanel ui:field="container" styleName="{style.absolute}">
+	    <g:FlowPanel styleName="{style.relative}">
+	    	<g:FlowPanel ui:field="flowPanel"/>
+	     </g:FlowPanel>
+     </g:FlowPanel>
 </ui:UiBinder>

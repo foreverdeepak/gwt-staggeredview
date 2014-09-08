@@ -86,5 +86,13 @@ public class Ad extends JavaScriptObject {
 		public final native String getImgType()/*-{ 
 			return this.imgType;
 		}-*/;
+		
+		public final native int getHeight()/*-{ 
+			return this.height;
+		}-*/;
+		
+		public final native int getWidth()/*-{ 
+			return this.width;
+		}-*/;
 	}
 }

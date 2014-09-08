@@ -1,100 +1,110 @@
 package net.foreverdeepak.gwt.sv.client;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import net.foreverdeepak.gwt.sv.client.ItemLoadedEvent.ColumnHeight;
+import net.foreverdeepak.gwt.sv.client.ItemLoadedEvent.ItemLoadedHandler;
 import net.foreverdeepak.gwt.sv.client.pojo.Ad;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.TableCellElement;
-import com.google.gwt.dom.client.TableRowElement;
-import com.google.gwt.event.logical.shared.ResizeEvent;
-import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.jsonp.client.JsonpRequestBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ScrollEvent;
 import com.google.gwt.user.client.Window.ScrollHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ListView extends Composite implements ResizeHandler, ScrollHandler {
+public class ListView extends Composite implements ScrollHandler, ItemLoadedHandler {
 
 	private static ListViewUiBinder uiBinder = GWT.create(ListViewUiBinder.class);
 
 	interface ListViewUiBinder extends UiBinder<Widget, ListView> {
 	}
 
-	@UiField TableRowElement mrow;
+	@UiField FlowPanel container;
+	@UiField FlowPanel flowPanel;
 	
-	int width = 0;
-	int tdCount = 0;
-	Unit unit = Unit.PCT;
-	int scrollTop = 0;
+	Map<Integer, Integer> columnHeightMap = new HashMap<Integer, Integer>();
+	ColumnHeight lowestColumnHeight = new ColumnHeight(0, 0);
+	int columnCount = 0;
 	
-	Timer resizeTimer;
-	RequestBuilder requestBuilder;
+	JsArray<Ad> ads = null;
+	int currentAdIndex = 0;
 	
-	ArrayList<TableCellElement> tds = new ArrayList<TableCellElement>();
-	
-	boolean loading = false;
-	
-	List<Ad> cachedAds = new ArrayList<Ad>();
-	
+	private boolean loading = false;
+
 	public ListView() {
 		initWidget(uiBinder.createAndBindUi(this));
-
-		resizeTimer = new Timer() {
-			@Override
-			public void run() {
-				reload();
-			}
-		};
-
-		Window.addResizeHandler(this);
+		setContainerStyle();
+		
+		GwtTest.eventBus.addHandler(ItemLoadedEvent.TYPE, this);
 		Window.addWindowScrollHandler(this);
-
-		load();
+		
+		columnCount = 5;
+		for (int i = 0; i < columnCount; i++) {
+			columnHeightMap.put(i, 0);
+		}
 		sendRequest();
 	}
 	
-	private void reload() {
-		if(getColumnColunt() != tdCount) {
-			mrow.removeAllChildren();
-			tds.clear();
-			load();
-			renderAds(cachedAds);
-		}
+	private void setContainerStyle() {
+		Style style = container.getElement().getStyle();
+		style.setDisplay(Display.BLOCK);
+		style.setProperty("margin", "auto");
+		style.setLeft(0, Unit.EM);
+		style.setRight(0, Unit.EM);
+		style.setTop(0, Unit.EM);
+		style.setBottom(0, Unit.EM);
+		style.setPaddingTop(2, Unit.EM);
+		style.setWidth(1310, Unit.PX);
 	}
 	
-	private void load () {
-		tdCount = getColumnColunt();
-		width = 100/tdCount;
-		createTds();
+	public void addItem(Ad item) {
+		Map.Entry<Integer, Integer> lowestEntry = getLowestHeight();
+		int columnIndex = lowestEntry.getKey();
+		
+		int height = lowestEntry.getValue();
+		
+		int top = height;
+		int left = columnIndex*265;
+		
+		ItemView view = new ItemView(item, columnIndex);
+		view.getElement().getStyle();
+		
+		view.setTop(top, Unit.PX);
+		view.setLeft(left, Unit.PX);
+		
+		flowPanel.add(view);
 	}
 	
-	private int getColumnColunt() {
-		int count = 0;
-		int deviceWidth = Window.getClientWidth();
-
-		if (deviceWidth <= 500) {
-			count = 2;
-		} else if (deviceWidth > 500 && deviceWidth <= 800) {
-			count = 3;
-		} else if (deviceWidth > 800 && deviceWidth <= 1000) {
-			count = 4; 
-		} else {
-			count = 5;
+	private Map.Entry<Integer, Integer> getLowestHeight() {
+		Map.Entry<Integer, Integer> lowest = columnHeightMap.entrySet().iterator().next();
+		for (Map.Entry<Integer, Integer> entry : columnHeightMap.entrySet()) {
+			if(entry.getValue() < lowest.getValue()) {
+				lowest = entry;
+			}
 		}
-		return count;
+		return lowest;
 	}
+	
+	public void setColumnHeight(int index, int height) {
+		int last = this.columnHeightMap.get(index);
+		this.columnHeightMap.put(index, height+last);
+	}
+	
+	public static native int getScreenWidth() /*-{
+		return screen.width;
+	}-*/;
 	
 	private void sendRequest() {
 		if(loading) {
@@ -108,8 +118,13 @@ public class ListView extends Composite implements ResizeHandler, ScrollHandler 
 			
 			@Override
 			public void onSuccess(JsArray<Ad> result) {
+				ListView.this.ads = result;
+				currentAdIndex = 0;
+				
+				ColumnHeight columnHeight = new ColumnHeight(lowestColumnHeight.index,lowestColumnHeight.height);
+				columnHeight.setNewLoad(true);
+				GwtTest.eventBus.fireEvent(new ItemLoadedEvent(columnHeight));
 				loading = false;
-				renderAds(result);
 			}
 			
 			@Override
@@ -117,67 +132,37 @@ public class ListView extends Composite implements ResizeHandler, ScrollHandler 
 				loading = false;
 			}
 		});
-		
 	}
-	
-	private void renderAds(List<Ad> ads) {
-		int tdIndex = 0;
-		for (Ad ad : ads) {
-			if(tdIndex == tdCount) {
-				tdIndex = 0;
-			}
-			TableCellElement td = tds.get(tdIndex);
-			AdItemView itemView = new AdItemView(ad, width, unit);
-			td.appendChild(itemView.getElement());
-			tdIndex++;
-		}
-		
-		if(cachedAds.size() > ads.size()) {
-			//Window.scrollTo(0, scrollTop+Window.getClientHeight());
-		}
-	}
-	
-	private void renderAds(JsArray<Ad> adArray) {
-		List<Ad> adList = new ArrayList<Ad>();
-		for (int i = 0; i < adArray.length(); i++) {
-			adList.add(adArray.get(i));
-		}
-		cachedAds.addAll(adList);
-		renderAds(adList);
-	}
-	
-	private void createTds() {
-		for (int i = 0; i < tdCount; i++) {
-			TableCellElement td = createTd(width, unit);
-			tds.add(td);
-			mrow.appendChild(td);
-		}
-	}
-
-	private TableCellElement createTd(int width, Unit unit) {
-		TableCellElement td = Document.get().createTDElement();
-		td.setAttribute("style", "vertical-align: top;");
-		td.setAttribute("width", width + unit.getType());
-		return td;
-	}
-
-	@Override
-	public void onResize(ResizeEvent event) {
-	    resizeTimer.cancel();
-	    resizeTimer.schedule(250);
-	}
-	
-	public static native String getDeviceDataUsingNative() /*-{
-		return " " + screen.pixelDepth + "  " + window.devicePixelRatio + " " + window.innerWidth + " " + window.outerWidth;
-	}-*/;
 	
 	@Override
 	public void onWindowScroll(ScrollEvent event) {
-		int scrollHeight = Document.get().getScrollHeight();
+		if(loading) return;
 		int windowHeight = Window.getClientHeight();
 		int scrollTop = Document.get().getScrollTop() + windowHeight;
-		if(scrollTop - scrollHeight >= 0) {
+		int height = getLowestHeight().getValue();
+		
+		int diff = Math.abs(scrollTop - height);
+		
+		if(diff >=0 && diff<=200) {
 			sendRequest();
+		}
+	}
+
+	@Override
+	public void onItemLoad(ColumnHeight columnHeight) {
+		int last = this.columnHeightMap.get(columnHeight.getIndex());
+		if(!columnHeight.isNewLoad()) {
+			if(columnHeight.getHeight() < lowestColumnHeight.getHeight()) {
+				lowestColumnHeight = columnHeight;
+			}
+			this.columnHeightMap.put(columnHeight.getIndex(), columnHeight.getHeight() +last + 15);
+		} else {
+			//this.columnHeightMap.put(lowestColumnHeight.getIndex(), lowestColumnHeight.getHeight() + 20);
+		}
+		
+		
+		if(currentAdIndex < ads.length()) {
+			addItem(ads.get(currentAdIndex++));
 		}
 	}
 }

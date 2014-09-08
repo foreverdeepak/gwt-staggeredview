@@ -1,0 +1,36 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+	<ui:style>
+	.card {
+		box-shadow: 0 1px 2px #aaa;
+		background: white;
+		border-radius: 0.5em;
+	}
+	
+	.img-style {
+		border-top-left-radius: 0.5em;
+		border-top-right-radius: 0.5em;
+	}
+	</ui:style>
+	<g:HTMLPanel>
+		<div style="position: absolute;" ui:field="itemDiv">
+			<section class="{style.card}" style="" ui:field="section">
+				<a ui:field="adDetailUrl">
+					<img class="{style.img-style}" ui:field="coverImage"></img>
+				</a>
+				<div ui:field="content">
+					<div>
+						<span ui:field="title" />
+					</div>
+					<div>
+						<span ui:field="description" />
+					</div>
+					<div>
+						<span ui:field="companyTitle" />
+					</div>
+				</div>
+			</section>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>
