@@ -1,32 +1,32 @@
 package net.foreverdeepak.gwt.sv.client;
 
-import net.foreverdeepak.gwt.sv.client.ItemLoadedEvent.ItemLoadedHandler;
+import net.foreverdeepak.gwt.sv.client.ColumnHeightUpdatedEvent.ColumnHeightEventHandler;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-public class ItemLoadedEvent extends GwtEvent<ItemLoadedHandler> {
+public class ColumnHeightUpdatedEvent extends GwtEvent<ColumnHeightEventHandler> {
 	
-    public static Type<ItemLoadedHandler> TYPE = new Type<ItemLoadedHandler>();
+    public static Type<ColumnHeightEventHandler> TYPE = new Type<ColumnHeightEventHandler>();
 
     private ColumnHeight columnHeight;
     
-	public ItemLoadedEvent(ColumnHeight columnHeight) {
+	public ColumnHeightUpdatedEvent(ColumnHeight columnHeight) {
 		this.columnHeight = columnHeight;
 	}
 
-	public static interface ItemLoadedHandler extends EventHandler {
-		void onItemLoad(ColumnHeight columnHeight);
+	public static interface ColumnHeightEventHandler extends EventHandler {
+		void onUpdate(ColumnHeight columnHeight);
 	}
 
 	@Override
-	public com.google.gwt.event.shared.GwtEvent.Type<ItemLoadedHandler> getAssociatedType() {
+	public com.google.gwt.event.shared.GwtEvent.Type<ColumnHeightEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 
 	@Override
-	protected void dispatch(ItemLoadedHandler handler) {
-		handler.onItemLoad(columnHeight);
+	protected void dispatch(ColumnHeightEventHandler handler) {
+		handler.onUpdate(columnHeight);
 	}
 
 	public static class ColumnHeight {

@@ -11,14 +11,17 @@
 	.img-style {
 		border-top-left-radius: 0.5em;
 		border-top-right-radius: 0.5em;
+		width: 100%;
 	}
 	</ui:style>
 	<g:HTMLPanel>
 		<div style="position: absolute;" ui:field="itemDiv">
 			<section class="{style.card}" style="" ui:field="section">
+				<div style="" ui:field="imageDiv">
 				<a ui:field="adDetailUrl">
 					<img class="{style.img-style}" ui:field="coverImage"></img>
 				</a>
+				</div>
 				<div ui:field="content">
 					<div>
 						<span ui:field="title" />

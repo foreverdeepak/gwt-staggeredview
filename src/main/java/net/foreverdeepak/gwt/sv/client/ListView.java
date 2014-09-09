@@ -3,8 +3,8 @@ package net.foreverdeepak.gwt.sv.client;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.foreverdeepak.gwt.sv.client.ItemLoadedEvent.ColumnHeight;
-import net.foreverdeepak.gwt.sv.client.ItemLoadedEvent.ItemLoadedHandler;
+import net.foreverdeepak.gwt.sv.client.ColumnHeightUpdatedEvent.ColumnHeight;
+import net.foreverdeepak.gwt.sv.client.ColumnHeightUpdatedEvent.ColumnHeightEventHandler;
 import net.foreverdeepak.gwt.sv.client.pojo.Ad;
 
 import com.google.gwt.core.client.GWT;
@@ -24,7 +24,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ListView extends Composite implements ScrollHandler, ItemLoadedHandler {
+public class ListView extends Composite implements ScrollHandler, ColumnHeightEventHandler {
 
 	private static ListViewUiBinder uiBinder = GWT.create(ListViewUiBinder.class);
 
@@ -47,7 +47,7 @@ public class ListView extends Composite implements ScrollHandler, ItemLoadedHand
 		initWidget(uiBinder.createAndBindUi(this));
 		setContainerStyle();
 		
-		GwtTest.eventBus.addHandler(ItemLoadedEvent.TYPE, this);
+		GwtTest.eventBus.addHandler(ColumnHeightUpdatedEvent.TYPE, this);
 		Window.addWindowScrollHandler(this);
 		
 		columnCount = 5;
@@ -123,7 +123,7 @@ public class ListView extends Composite implements ScrollHandler, ItemLoadedHand
 				
 				ColumnHeight columnHeight = new ColumnHeight(lowestColumnHeight.index,lowestColumnHeight.height);
 				columnHeight.setNewLoad(true);
-				GwtTest.eventBus.fireEvent(new ItemLoadedEvent(columnHeight));
+				GwtTest.eventBus.fireEvent(new ColumnHeightUpdatedEvent(columnHeight));
 				loading = false;
 			}
 			
@@ -149,7 +149,7 @@ public class ListView extends Composite implements ScrollHandler, ItemLoadedHand
 	}
 
 	@Override
-	public void onItemLoad(ColumnHeight columnHeight) {
+	public void onUpdate(ColumnHeight columnHeight) {
 		int last = this.columnHeightMap.get(columnHeight.getIndex());
 		if(!columnHeight.isNewLoad()) {
 			if(columnHeight.getHeight() < lowestColumnHeight.getHeight()) {
