@@ -32,16 +32,18 @@ public class ItemView extends Composite {
 	@UiField DivElement content;
 	@UiField DivElement imageDiv;
 	
-	private int imageHeight = 100;
-	
-	int index;
+	int imageHeight = 0;
+	int index = 0;
+	int width = 0;
 
-	public ItemView(Ad ad, int index) {
+	public ItemView(Ad ad, int index, int width) {
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		this.index = index;
+		this.width = width;
+		this.imageHeight = width;
 	
-		section.getStyle().setWidth(250, Unit.PX);
+		section.getStyle().setWidth(width, Unit.PX);
 		adDetailUrl.setHref("/ad/" + ad.getId());
 		title.setInnerText(ad.getTitle());
 		description.setInnerText(ad.getDescription());
@@ -55,7 +57,7 @@ public class ItemView extends Composite {
 			}
 		}
 		
-		imageDiv.getStyle().setWidth(250, Unit.PX);
+		imageDiv.getStyle().setWidth(width, Unit.PX);
 		
 		if(cImg != null) {
 			coverImage.setSrc("http://www.madpiggy.com:5052/ad/" + ad.getId() + "/" +cImg.getName());
@@ -65,7 +67,7 @@ public class ItemView extends Composite {
 	}
 	
 	private int getCalulatedHeight(Img img) {
-		return (int) ((double)img.getHeight()/(img.getWidth()*1.00)*250);
+		return (int) ((double)img.getHeight()/(img.getWidth()*1.00)*width);
 	}
 	
 	public void setTop(int value, Unit unit) {
@@ -79,7 +81,7 @@ public class ItemView extends Composite {
 	@Override
 	protected void onLoad() {
 		int height = content.getClientHeight() + imageHeight;
-		GwtTest.eventBus.fireEvent(new ColumnHeightUpdatedEvent(new ColumnHeightUpdatedEvent.ColumnHeight(index, height)));
+		SViewEntryPoint.eventBus.fireEvent(new ColumnHeightUpdatedEvent(new ColumnHeightUpdatedEvent.ColumnHeight(index, height)));
 		super.onLoad();
 	}
 }

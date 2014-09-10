@@ -3,7 +3,7 @@
   <inherits name='com.google.gwt.user.User' />
 
   <inherits name='com.google.gwt.user.theme.standard.Standard' />
-  <entry-point class='net.foreverdeepak.gwt.sv.client.GwtTest' />
+  <entry-point class='net.foreverdeepak.gwt.sv.client.SViewEntryPoint' />
 
   <source path='client' />
 

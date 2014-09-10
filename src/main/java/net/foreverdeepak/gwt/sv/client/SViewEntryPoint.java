@@ -6,13 +6,12 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.RootPanel;
 
-public class GwtTest implements EntryPoint {
+public class SViewEntryPoint implements EntryPoint {
 	
 	public static EventBus eventBus = null;
 
 	@Override
 	public void onModuleLoad() {
-		
 		eventBus  = GWT.create(SimpleEventBus.class);
 		ListView listView = new ListView();
 

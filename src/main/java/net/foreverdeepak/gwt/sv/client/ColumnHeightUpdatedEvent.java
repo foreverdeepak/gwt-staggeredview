@@ -54,7 +54,5 @@ public class ColumnHeightUpdatedEvent extends GwtEvent<ColumnHeightEventHandler>
 		public void setNewLoad(boolean newLoad) {
 			this.newLoad = newLoad;
 		}
-
 	}
-
 }
