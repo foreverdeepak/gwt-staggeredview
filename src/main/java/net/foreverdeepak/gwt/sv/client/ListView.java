@@ -45,20 +45,12 @@ public class ListView extends Composite implements ScrollHandler, ColumnHeightEv
 	ColumnHeight lowestColumnHeight = new ColumnHeight(0, 0);
 	
 	int currentAdIndex = 0;
-	int screenWidth = 0;
-	int screenHeight = 0;
-	int windowWidth = 0;
-	int windowHeight = 0;
-	
-	int itemWidth = 0; 
-	int itemMargin = 0;
-	int columnCount = 0;
-	int containerWidth = 0;
-	
 	private boolean loading = false;
 	
 	List<Ad> cachedAds = new ArrayList<Ad>();
 	List<Ad> recentAds = new ArrayList<Ad>();
+	
+	DeviceProperties props = new DeviceProperties();
 	
 	public ListView() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -81,52 +73,30 @@ public class ListView extends Composite implements ScrollHandler, ColumnHeightEv
 	}
 	
 	private void load() {
-		calculateDeviceProperties();
+		props = new DeviceProperties();
+		props.calculateDeviceProperties();
 		columnHeightMap.clear();
-		for (int i = 0; i < columnCount; i++) {
+		for (int i = 0; i < props.columnCount; i++) {
 			columnHeightMap.put(i, 0);
 		}
 		setContainerStyle();
 	}
 	
 	private void resize() {
-		Window.Location.reload();
-	}
-	
-	private void calculateDeviceProperties() {
-		screenWidth = getScreenWidth();
-		windowWidth = Window.getClientWidth();
-		if(screenWidth == 0) {
-			screenWidth = windowWidth;
+		DeviceProperties deviceProperties = new DeviceProperties();
+		deviceProperties.calculateDeviceProperties();
+		if(deviceProperties.columnCount != props.columnCount) {
+			flowPanel.clear();
+			recentAds.clear();
+			deviceProperties = new DeviceProperties();
+			deviceProperties.calculateDeviceProperties();
+			recentAds.addAll(cachedAds);
+			load();
+			currentAdIndex = 0;
+			lowestColumnHeight = new ColumnHeight(0,0);
+			lowestColumnHeight.setNewLoad(true);
+			SViewEntryPoint.eventBus.fireEvent(new ColumnHeightUpdatedEvent(lowestColumnHeight));
 		}
-		
-		screenHeight = getScreenHeight();
-		windowHeight = Window.getClientHeight();
-		if(screenHeight == 0) {
-			screenHeight = windowHeight;
-		}
-		
-		if(screenWidth <= 400) {
-			columnCount = 2;
-		} else if(screenWidth > 400 && screenWidth <= 800 ) {
-			columnCount = 3;
-		} else if(screenWidth > 800 && screenWidth <= 1000 ) {
-			columnCount = 4;
-		} else {
-			columnCount = 5;
-		}
-		
-		itemMargin = screenWidth/100;
-		if(itemMargin < 10) {
-			itemMargin = 10;
-			itemWidth = (screenWidth / columnCount) - 2*itemMargin;
-		} else {
-			itemWidth = (screenWidth / columnCount) - 3*itemMargin;
-		}
-		
-		columnCount = windowWidth/itemWidth; 
-
-		containerWidth = ((itemWidth+itemMargin)*columnCount) - itemMargin;
 	}
 	
 	private void setContainerStyle() {
@@ -138,7 +108,7 @@ public class ListView extends Composite implements ScrollHandler, ColumnHeightEv
 		style.setTop(0, Unit.EM);
 		style.setBottom(0, Unit.EM);
 		style.setPaddingTop(1, Unit.EM);
-		style.setWidth(containerWidth, Unit.PX);
+		style.setWidth(props.containerWidth, Unit.PX);
 	}
 	
 	public void addItem(Ad item) {
@@ -148,9 +118,9 @@ public class ListView extends Composite implements ScrollHandler, ColumnHeightEv
 		int height = lowestEntry.getValue();
 		
 		int top = height;
-		int left = columnIndex*(itemWidth + itemMargin);
+		int left = columnIndex*(props.itemWidth + props.itemMargin);
 		
-		ItemView view = new ItemView(item, columnIndex, itemWidth);
+		ItemView view = new ItemView(item, columnIndex, props.itemWidth);
 		
 		view.setTop(top, Unit.PX);
 		view.setLeft(left, Unit.PX);
@@ -229,7 +199,7 @@ public class ListView extends Composite implements ScrollHandler, ColumnHeightEv
 			if(columnHeight.getHeight() < lowestColumnHeight.getHeight()) {
 				lowestColumnHeight = columnHeight;
 			}
-			this.columnHeightMap.put(columnHeight.getIndex(), columnHeight.getHeight() +last + itemMargin);
+			this.columnHeightMap.put(columnHeight.getIndex(), columnHeight.getHeight() +last + props.itemMargin);
 		}
 		
 		if(currentAdIndex < recentAds.size()) {
@@ -241,5 +211,52 @@ public class ListView extends Composite implements ScrollHandler, ColumnHeightEv
 	public void onResize(ResizeEvent event) {
 		resizeTimer.cancel();
 	    resizeTimer.schedule(250);
+	}
+	
+	public static class DeviceProperties {
+		int screenWidth;
+		int windowWidth;
+		int screenHeight;
+		int windowHeight;
+		int columnCount;
+		int itemMargin;
+		int containerWidth;
+		int itemWidth;
+		
+		public void calculateDeviceProperties() {
+			screenWidth = getScreenWidth();
+			windowWidth = Window.getClientWidth();
+			if(screenWidth == 0 || screenWidth < windowWidth) {
+				screenWidth = windowWidth;
+			}
+			
+			screenHeight = getScreenHeight();
+			windowHeight = Window.getClientHeight();
+			if(screenHeight == 0 || screenHeight < windowHeight) {
+				screenHeight = windowHeight;
+			}
+			
+			if(screenWidth <= 400) {
+				columnCount = 2;
+			} else if(screenWidth > 400 && screenWidth <= 800 ) {
+				columnCount = 3;
+			} else if(screenWidth > 800 && screenWidth <= 1000 ) {
+				columnCount = 4;
+			} else {
+				columnCount = 5;
+			}
+			
+			itemMargin = screenWidth/100;
+			if(itemMargin < 10) {
+				itemMargin = 10;
+				itemWidth = (screenWidth / columnCount) - 2*itemMargin;
+			} else {
+				itemWidth = (screenWidth / columnCount) - 3*itemMargin;
+			}
+			
+			columnCount = windowWidth/itemWidth; 
+			
+			containerWidth = ((itemWidth+itemMargin)*columnCount) - itemMargin;
+		}
 	}
 }
