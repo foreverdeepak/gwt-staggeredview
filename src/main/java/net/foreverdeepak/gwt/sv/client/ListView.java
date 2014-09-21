@@ -28,6 +28,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.googlecode.mgwt.dom.client.event.orientation.OrientationChangeEvent;
+import com.googlecode.mgwt.dom.client.event.orientation.OrientationChangeHandler;
+import com.googlecode.mgwt.ui.client.MGWT;
 
 public class ListView extends Composite implements ScrollHandler, ColumnHeightEventHandler, ResizeHandler {
 
@@ -67,6 +70,20 @@ public class ListView extends Composite implements ScrollHandler, ColumnHeightEv
 		};
 
 		Window.addResizeHandler(this);
+		
+		MGWT.addOrientationChangeHandler(new OrientationChangeHandler() {
+
+			@Override
+			public void onOrientationChanged(OrientationChangeEvent event) {
+				switch (event.getOrientation()) {
+				case LANDSCAPE:
+					return;
+				case PORTRAIT:
+					return;
+				}
+			}
+		});
+
 		
 		load();
 		sendRequest();

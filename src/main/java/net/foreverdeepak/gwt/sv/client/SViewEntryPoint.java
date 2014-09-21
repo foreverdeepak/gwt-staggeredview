@@ -7,12 +7,12 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class SViewEntryPoint implements EntryPoint {
-	
+
 	public static EventBus eventBus = null;
 
 	@Override
 	public void onModuleLoad() {
-		eventBus  = GWT.create(SimpleEventBus.class);
+		eventBus = GWT.create(SimpleEventBus.class);
 		ListView listView = new ListView();
 
 		RootPanel.get("gwtdiv").add(listView);
